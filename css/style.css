@@ -1,0 +1,42 @@
+body{
+    background-color: #00697C;
+    color: black;
+}
+
+#roomtile{
+    border: 5px solid #004F32 ;
+    min-width: 250px;
+    text-align: center;
+    border-radius: 20px;
+    margin: 10px;
+    padding: 0;
+    background-color: #fff;
+}
+#roomtilenext{
+    border-top: 5px solid #004F32;
+    width: 100%;
+}
+#roomtilecurrent{
+    width: 100%;
+}
+/*  */
+.roomtitle{
+    font-weight: bold;
+    font-size: larger;
+}
+
+.bookedtime{
+    font-weight: lighter;
+}
+.coursetitle{
+    font-weight: bold;
+    font-size: x-large;
+}
+.companytitle{
+    font-weight: normal;
+    font-size: larger;
+}
+.next-company{
+    font-weight: lighter;
+    font-size: smaller;
+}
