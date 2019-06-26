@@ -18,7 +18,7 @@ function updateCards() {
     const url = 'http://staging.seats2meet.com/api/event/public/location/' + LocationId;
     fetch(url, {
         headers: headers,
-        method: 'POST',
+        method: 'GET',
         cache: 'no-cache',
     })
         .then(response => response.json())
