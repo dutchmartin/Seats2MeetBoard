@@ -13,7 +13,14 @@ const headers = new Headers();
 headers.append('Content-Type', 'application/json');
 headers.append("token", "398140257");
 
-
+function printDate(date) {
+    if (date == ''){
+        return 'NVT'
+    }
+    else{
+        return moment(date).format("H:mm");
+    }
+}
 
 function updateCards() {
     fetch('http://staging.seats2meet.com/api/meetingspace/location/' + LocationId, {
@@ -76,7 +83,7 @@ function updateCards() {
                             "                    <br/>" +
                             "                    <span class=\"companytitle\">" + item.CompanyName + "</span>" +
                             "                    <br/>" +
-                            "                    <span class=\"bookedtime\">"+ moment(item.StartTime).format("H:mm") +"-"+ moment(item.EndTime).format("H:mm") +"</span>" +
+                            "                    <span class=\"bookedtime\">"+ printDate(item.StartTime) +"-"+ printDate(item.EndTime) +"</span>" +
                             "                </div>" +
                             // "                <div id=\"roomtilenext\">\n" +
                             // "                    <span class=\"next-company\">00:00 - volgend bedrijf</span>" +
