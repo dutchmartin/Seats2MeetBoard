@@ -28,10 +28,10 @@ function updateCards() {
                 for (let item of data.Results) {
                     rooms.push({
                         'Name': item.Name,
-                        'Title': 'leeg',
-                        'CompanyName': 'Onbekend',
-                        'StartTime': "0",
-                        'EndTime': "0",
+                        'Title': 'beschikbaar',
+                        'CompanyName': ' ',
+                        'StartTime': "",
+                        'EndTime': "",
                     })
                 }
                 return rooms;
