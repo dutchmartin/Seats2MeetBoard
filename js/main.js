@@ -7,6 +7,11 @@
 
 const LocationId = 85;
 
+const ExcludedMeetingspaces = [
+    "S2M Pop-up store",
+    "Ruimte opname videoblogs",
+];
+
 const contentCardsHolder = document.getElementById("content-cards-holder");
 
 const headers = new Headers();
@@ -17,7 +22,7 @@ function printDate(date) {
     if (date == ''){
         return 'NVT'
     }
-    else{
+    else {
         return moment(date).format("H:mm");
     }
 }
@@ -29,6 +34,10 @@ function updateCards() {
         cache: 'no-cache',
     })
         .then(response => response.json())
+        .then(function(data){
+            data.Results = data.Results.filter(room => !ExcludedMeetingspaces.includes(room.Name));
+            return data;
+        })
         .then(
             function(data){
                 let rooms = [];
@@ -53,7 +62,7 @@ function updateCards() {
             .then(
                 function(data){
                     for(let meeting of data){
-                        console.log(meeting);
+
                         for(let meetingspace of meeting.Meetingspaces){
                             // search for meetingspace.
                             console.log(meetingspace);
