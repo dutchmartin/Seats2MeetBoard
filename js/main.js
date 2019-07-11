@@ -10,6 +10,8 @@ const LocationId = 85;
 const ExcludedMeetingspaces = [
     "S2M Pop-up store",
     "Ruimte opname videoblogs",
+    "Stilteruimte Verhuur",
+    "Kookstudio",
 ];
 
 const contentCardsHolder = document.getElementById("content-cards-holder");
