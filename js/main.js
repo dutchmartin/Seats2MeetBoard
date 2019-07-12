@@ -67,7 +67,6 @@ function updateCards() {
 
                         for(let meetingspace of meeting.Meetingspaces){
                             // search for meetingspace.
-                            console.log(meetingspace);
                             let index = rooms.findIndex(room => meetingspace === room.Name);
                             if(index >= 0) {
                                 rooms[index].Title = meeting.Name;
@@ -76,15 +75,27 @@ function updateCards() {
                                 rooms[index].EndTime = meeting.EndTime;
                             }
                             else {
-                                console.log('did not find' + meetingspace)
+                                console.log('did not find ' + meetingspace)
                             }
                         }
                     }
+                    rooms.sort(function(a, b) {
+                        if(a.StartTime === ''){
+                            return 1
+                        }
+                        if(b.StartTime === ''){
+                            return -1
+                        }
+                        if (moment().diff(moment(a.StartTime), 'minutes') > moment().diff(moment(b.StartTime), 'minutes')) {
+                            return -1;
+                        }
+                        if (moment().diff(moment(a.StartTime), 'minutes') < moment().diff(moment(b.StartTime), 'minutes')) {
+                            return 1;
+                        }
+                    });
 
-                    rooms.sort((a, b) => (a.Name > b.Name) ? 1 : -1);
                     contentCardsHolder.innerHTML = "";
                     for(let item of rooms) {
-                        console.log(item);
                         contentCardsHolder.innerHTML +=
                             "            <div class=\"col\" id=\"roomtile\">" +
                             "                <div id=\"roomtilecurrent\">" +

@@ -1,11 +1,12 @@
 body{
-    background-color: #87D628;
     color: black;
     word-wrap: break-word;
+    background-color: #eee;
 }
 
-#roomtile{
-    border: 5px solid #004F32 ;
+#roomtile {
+    color: #004F32;
+    border: 5px solid #87D628 ;
     min-width: 250px;
     max-width: 340px;
     text-align: center;
