@@ -97,6 +97,9 @@ function updateCards() {
                         case "roomname":
                             rooms.sort((a, b) => (a.Name > b.Name) ? 1 : -1);
                             break;
+                        case "eventname":
+                            rooms.sort((a, b) => (a.Title > b.Title) ? 1 : -1);
+                            break;
                         default:
                             rooms.sort(filterOnTime);
                             break;
