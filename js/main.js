@@ -1,10 +1,9 @@
 /**
- * id number of the location.
- * 85 for Utrecht Centraal CS
- * 378 for Utrecht Centraal CS
+ * Id number of the location.
+ * 85 for Utrecht CS
+ * 378 for Den Bosch CS
  * @type {number}
  */
-
 const LocationId = 85;
 
 const ExcludedMeetingspaces = [
@@ -13,7 +12,7 @@ const ExcludedMeetingspaces = [
     "Stilteruimte Verhuur",
     "Kookstudio",
 ];
-
+const sorting = new URL(window.location).searchParams.get("sort");
 const contentCardsHolder = document.getElementById("content-cards-holder");
 
 const headers = new Headers();
@@ -28,6 +27,20 @@ function printDate(date) {
         return moment(date).format("H:mm");
     }
 }
+const filterOnTime = function(a, b) {
+    if (a.StartTime === '') {
+        return 1
+    }
+    if (b.StartTime === '') {
+        return -1
+    }
+    if (moment().diff(moment(a.StartTime), 'minutes') > moment().diff(moment(b.StartTime), 'minutes')) {
+        return -1;
+    }
+    if (moment().diff(moment(a.StartTime), 'minutes') < moment().diff(moment(b.StartTime), 'minutes')) {
+        return 1;
+    }
+};
 
 function updateCards() {
     fetch('http://staging.seats2meet.com/api/meetingspace/location/' + LocationId, {
@@ -79,20 +92,18 @@ function updateCards() {
                             }
                         }
                     }
-                    rooms.sort(function(a, b) {
-                        if(a.StartTime === ''){
-                            return 1
-                        }
-                        if(b.StartTime === ''){
-                            return -1
-                        }
-                        if (moment().diff(moment(a.StartTime), 'minutes') > moment().diff(moment(b.StartTime), 'minutes')) {
-                            return -1;
-                        }
-                        if (moment().diff(moment(a.StartTime), 'minutes') < moment().diff(moment(b.StartTime), 'minutes')) {
-                            return 1;
-                        }
-                    });
+
+                    switch (sorting) {
+                        case "time":
+                            rooms.sort(filterOnTime);
+                            break;
+                        case "roomname":
+                            rooms.sort((a, b) => (a.Name > b.Name) ? 1 : -1);
+                            break;
+                        default:
+                            rooms.sort(filterOnTime);
+                            break;
+                    }
 
                     contentCardsHolder.innerHTML = "";
                     for(let item of rooms) {
