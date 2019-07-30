@@ -8,7 +8,14 @@ const LocationId = 85;
 
 const excludePrefix = "[hidden]";
 
-const sorting = new URL(window.location).searchParams.get("sort");
+const sorting = (function (){
+    try {
+        return new URL(window.location.href).searchParams.get("sort");
+    }
+    catch (e) {
+        return "";
+    }
+}());
 
 const contentCardsHolder = document.getElementById("content-cards-holder");
 
@@ -47,7 +54,7 @@ function updateCards() {
     })
         .then(response => response.json())
         .then(function(data){
-            data.Results = data.Results.filter(room => !room.name.startsWith(excludePrefix));
+            data.Results = data.Results.filter(room => !room.Name.startsWith(excludePrefix));
             return data;
         })
         .then(
