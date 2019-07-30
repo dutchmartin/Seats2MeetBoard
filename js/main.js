@@ -6,13 +6,10 @@
  */
 const LocationId = 85;
 
-const ExcludedMeetingspaces = [
-    "S2M Pop-up store",
-    "Ruimte opname videoblogs",
-    "Stilteruimte Verhuur",
-    "Kookstudio",
-];
+const excludePrefix = "[hidden]";
+
 const sorting = new URL(window.location).searchParams.get("sort");
+
 const contentCardsHolder = document.getElementById("content-cards-holder");
 
 const headers = new Headers();
@@ -50,7 +47,7 @@ function updateCards() {
     })
         .then(response => response.json())
         .then(function(data){
-            data.Results = data.Results.filter(room => !ExcludedMeetingspaces.includes(room.Name));
+            data.Results = data.Results.filter(room => !room.name.startsWith(excludePrefix));
             return data;
         })
         .then(
