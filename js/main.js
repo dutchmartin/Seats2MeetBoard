@@ -47,7 +47,7 @@ const filterOnTime = function(a, b) {
 };
 
 function updateCards() {
-    fetch('http://staging.seats2meet.com/api/meetingspace/location/' + LocationId, {
+    fetch('http://seats2meet.com/api/meetingspace/location/' + LocationId, {
         headers: headers,
         method: 'GET',
         cache: 'no-cache',
@@ -71,7 +71,7 @@ function updateCards() {
                 }
                 return rooms;
             }).then(function (rooms) {
-        const url = 'http://staging.seats2meet.com/api/event/public/location/' + LocationId;
+        const url = 'http://seats2meet.com/api/event/public/location/' + LocationId;
         fetch(url, {
             headers: headers,
             method: 'GET',
