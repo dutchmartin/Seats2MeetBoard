@@ -47,3 +47,9 @@ body{
     align-items: center;
     justify-content: center;
 }
+#hello-header {
+    text-align: center;
+    color: #004F32;
+    background-color: white;
+    border-bottom: 3px solid #87D628;
+}
