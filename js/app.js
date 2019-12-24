@@ -27,8 +27,8 @@ var board = new Vue({
 
     data() {
         return {
-            apiUrl: 'http://localhost:50210/api',
-            apiNewUrl: 'http://localhost:51279/api/v1',
+            apiUrl: 'https://www.seats2meet.com/api',
+            apiNewUrl: 'https://api.seats2meet.com/api/v1',
             apiToken: 398140257,
             azureStorageUrl: 'https://az691754.vo.msecnd.net/website',
             greetingTextInterval: null,
