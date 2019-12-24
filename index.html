@@ -11,8 +11,14 @@
 
     <!-- Bootstrap core CSS -->
     
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <!-- PRODUCTION -->
+    <!-- <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vue"></script> -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    
+    <!-- DEVELOPMENT -->
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
+    
+    <!-- CSS files -->
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,500italic,400,500,600" rel="stylesheet">
     <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
@@ -33,35 +39,53 @@
     </div>
     <div v-if="initialLoadReady" key="initialLoadReady" class="container-fluid">
         <div class="row topbar">
-            <span id="hostImage" class="hostImage shadow-sm rounded-circle"></span>
+            <span v-if="virtualManager && virtualManager.Image !== ''"
+                :style="{backgroundImage: `url(${getVirtualManagerImageSrc(virtualManager.Image, locationId, 160)})`}"
+                id="hostImage" class="hostImage shadow-sm rounded-circle"></span>
             <span class="greetingText-container">
                 <transition
                     name="fade"
                     mode="out-in"
                 >
-                    <div
-                    :key="greetingTextIndex"
-                    class="padding has-background-white has-framework-roundness"
-                    >
-                    <h2
-                        class="title is-size-3 has-text-blue-dark is-marginless"
+                    <span
+                        :key="greetingTextIndex"
+                        class="text h3 rounded-lg"
                         v-html="greetingTexts[greetingTextIndex]"
-                    ></h2>
-                    </div>
+                    ></span>
                 </transition>
-                <span id="greetingText" class="text rounded h3">Test</span>
             </span>
         </div>
         <div class="row" id="content-cards-holder">
-            <!-- Content -->
+            <div v-for="(item, index) in meetings" :key="'ms_' + index" class="col">
+                <meeting-card
+                    :company-name="item.CompanyName"
+                    :meeting-title="item.Name"
+                    :space-title="'TEST'">
+                </meeting-card>
+            </div>
         </div>
     </div>
     </transition>
 </div>
 <!-- Bootstrap core JavaScript -->
     <script src="js/app.js" defer></script>
-<script src="vendor/jquery/jquery.slim.min.js"></script>
-<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<script type="text/x-template" id="meetingCard">
+    <div class="shadow-sm">
+        <div class="h4">
+        {{ spaceTitle }}
+        </div>
+        <div class="h2">
+        {{ meetingTitle }}
+        </div>
+        <div class="h3">
+        {{ companyName }}
+        </div>
+    </div>
+</script>
+
+<!-- <script src="vendor/jquery/jquery.slim.min.js"></script>
+<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script> -->
 
 </body>
 

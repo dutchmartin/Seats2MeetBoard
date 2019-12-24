@@ -32,11 +32,6 @@ body{
     padding: 15px;
 }
 
-#content-cards-holder {
-    /* display: flex;
-    align-items: center; */
-}
-
 #roomtile {
     color: #004F32;
     border: 5px solid #87D628 ;
@@ -49,12 +44,12 @@ body{
     background-color: #fff;
 }
 
-#roomtilecurrent{
+/* #roomtilecurrent{
     max-width: 400px;
     height: 225px;
-}
+} */
 /*  */
-.roomtitle{
+/* .roomtitle{
     font-weight: bold;
     font-size: larger;
 }
@@ -77,7 +72,7 @@ body{
 #content-cards-holder{
     align-items: center;
     justify-content: center;
-}
+} */
 /* #hello-header {
     text-align: center;
     color: #004F32;

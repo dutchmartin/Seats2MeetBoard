@@ -1,12 +1,38 @@
+/**
+ * Register the meeting card component
+ */
+Vue.component('meeting-card', {
+    template: '#meetingCard',
+    props: {
+      companyName: String,
+      meetingTitle: String,
+      spaceTitle: String
+    },
+    data() {
+      return {
+      }
+    },
+    
+    methods: {
+    }
+  })
+
+
+/**
+ * App startup code
+ */
 var board = new Vue({
     el: '#board',
+    mode: 'development',
+
     data() {
         return {
-            initialLoadReady: false, 
-            locationId: 85,
             apiUrl: 'http://localhost:50210/api',
             apiNewUrl: 'http://localhost:51279/api/v1',
             apiToken: 398140257,
+            azureStorageUrl: 'https://az691754.vo.msecnd.net/website',
+            greetingTextInterval: null,
+            greetingTextIntervalTimer: 6000,
             greetingTextIndex: 0,
             greetingTexts: [
                 this.getGreetingText(),
@@ -14,15 +40,21 @@ var board = new Vue({
                 'Welkom',
                 'Wat is jouw meetingspace vandaag?'
             ],
+            initialLoadReady: false, 
+            locationId: 85,
             location: null,
-            spaces: [],
             meetings: [],
-            virtualmanager: null
+            spaces: [],
+            virtualManager: null,
         }
     },
 
     created() {
         this.init();
+    },
+
+    beforeDestroy() {
+        clearInterval(self.greetingTextInterval);
     },
 
     methods: {
@@ -48,7 +80,7 @@ var board = new Vue({
               // Process virtual  manager
               if(virtualManagerResponse.status === 200) {
                 self.greetingTexts.splice(3, 0, 'Mijn naam is '+ virtualManagerResponse.data.Name +', Ik ben de host op deze locatie');
-                self.virtualmanager = virtualManagerResponse.data;
+                self.virtualManager = virtualManagerResponse.data;
               }
 
               // Process events
@@ -58,6 +90,13 @@ var board = new Vue({
             }))
             .finally(function(){
                 self.initialLoadReady = true;
+                self.greetingTextInterval = setInterval(function() {
+                    if (self.greetingTextIndex >= self.greetingTexts.length - 1) {
+                        self.greetingTextIndex = 0
+                      } else {
+                        self.greetingTextIndex = self.greetingTextIndex + 1
+                      }
+                }, 6000)
             });
         },
 
@@ -69,7 +108,7 @@ var board = new Vue({
             if (d.getHours() < 12) {
             return 'Goedemorgen';
             } else if (d.getHours() >= 12 && d.getHours() < 18) {
-            return 'Goedenmiddag';
+            return 'Goedemiddag';
             } else {
             return 'Goedenavond';
             }
@@ -129,6 +168,50 @@ var board = new Vue({
                     token: this.apiToken
                 }
             });
-        }
+        },
+
+        /**
+         * Build virtual manage image url
+         * @param {string} filename 
+         * @param {number} locationId 
+         * @param {number} size
+         */
+        getVirtualManagerImageSrc(filename = '', locationId = 0, size = null) {
+            let virtualManagerPhotoSize = {
+                80: '84x84_',
+                160: '160x160_',
+                240: '240x240_'
+              };
+
+            if (filename === '' || locationId === 0) {
+              return '';
+            }
+            if (size === null || size === 0) {
+              // Original photo size
+              return `${this.azureStorageUrl}/${locationId.toString()}/${filename}`;
+            } else {
+              return this.getSizedJPGVersion(locationId.toString(), filename, virtualManagerPhotoSize[size]);
+            }
+        },
+
+        /**
+         * Get sized JPG version
+         * @param {string} prefix 
+         * @param {string} filename 
+         * @param {string} size 
+         */
+        getSizedJPGVersion(prefix = '', filename = '', size = '') {
+            if (prefix !== '') {
+              prefix = '/' + prefix;
+            }
+          
+            let filenameNoExtension = filename.substring(0, filename.lastIndexOf('.'));
+          
+            let position = Number(filename.indexOf('.'));
+            let imageLength = Number(filename.length);
+            let imageExtension = filename.substring(position, imageLength);
+          
+            return `${this.azureStorageUrl}${prefix}/${size}${filenameNoExtension}${imageExtension}`;
+          }
     }
   })
