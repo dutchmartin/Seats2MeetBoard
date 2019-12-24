@@ -4,21 +4,51 @@ body{
     background-color: #eee;
 }
 
+* {
+    font-family: 'Open Sans', Tahoma, Arial;
+}
+
+.topbar {
+    padding: 15px;
+    background-color: #fec632;
+}
+
+.hostImage {
+    width: 100px;
+    height: 100px;
+    margin-right: 30px;
+    background-color: lightgrey;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+.greetingText-container {
+    display: flex;
+    align-items: center;
+}
+.greetingText-container .text {
+    background-color: whitesmoke;
+    font-weight: 600;
+    padding: 15px;
+}
+
+#content-cards-holder {
+    /* display: flex;
+    align-items: center; */
+}
+
 #roomtile {
     color: #004F32;
     border: 5px solid #87D628 ;
     min-width: 250px;
     max-width: 340px;
     text-align: center;
-    border-radius: 20px;
-    margin: 10px;
-    padding: 0;
+    border-radius: 15px;
+    margin: 15px;
+    padding: 15px;
     background-color: #fff;
 }
-#roomtilenext{
-    border-top: 5px solid #004F32;
-    width: 100%;
-}
+
 #roomtilecurrent{
     max-width: 400px;
     height: 225px;
@@ -48,9 +78,73 @@ body{
     align-items: center;
     justify-content: center;
 }
-#hello-header {
+/* #hello-header {
     text-align: center;
     color: #004F32;
     background-color: white;
     border-bottom: 3px solid #87D628;
+} */
+
+
+
+
+/**
+TRANSITIONS
+*/
+/* Fade */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s;
+}
+.fade-enter,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/* Slide */
+.slide-fade-enter-active {
+  transition: all 0.3s ease;
+}
+.slide-fade-leave-active {
+  transition: all 0.4s cubic-bezier(1, 0.1, 0.4, 1);
+}
+.slide-fade-enter,
+.slide-fade-leave-to {
+  transform: translateX(10px);
+  opacity: 0;
+}
+
+@-webkit-keyframes sk-rotate {
+  100% {
+    -webkit-transform: rotate(360deg);
+  }
+}
+
+@keyframes sk-rotate {
+  100% {
+    transform: rotate(360deg);
+    -webkit-transform: rotate(360deg);
+  }
+}
+
+@-webkit-keyframes sk-bounce {
+  0%,
+  100% {
+    -webkit-transform: scale(0);
+  }
+  50% {
+    -webkit-transform: scale(1);
+  }
+}
+
+@keyframes sk-bounce {
+  0%,
+  100% {
+    transform: scale(0);
+    -webkit-transform: scale(0);
+  }
+  50% {
+    transform: scale(1);
+    -webkit-transform: scale(1);
+  }
 }
