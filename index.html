@@ -60,7 +60,9 @@
                 <meeting-card
                     :company-name="item.CompanyName"
                     :meeting-title="item.Name"
-                    :space-title="'TEST'">
+                    :space-name="item.Meetingspaces[0]"
+                    :start-minutes="item.StartMinutes"
+                    :end-minutes="item.EndMinutes">
                 </meeting-card>
             </div>
         </div>
@@ -72,14 +74,19 @@
 
 <script type="text/x-template" id="meetingCard">
     <div class="spaceTile shadow-sm">
-        <div class="h4">
-        {{ spaceTitle }}
+        <div class="top">
+            <div class="spaceName">
+            {{ spaceName }}
+            </div>
+            <div class="meetingTitle">
+            {{ meetingTitle }}
+            </div>
+            <div class="companyName">
+            {{ companyName }}
+            </div>
         </div>
-        <div class="h2">
-        {{ meetingTitle }}
-        </div>
-        <div class="h3">
-        {{ companyName }}
+        <div class="bottom">
+        {{ StartMinutes | minutesToTime }} - {{ EndMinutes | minutesToTime }}
         </div>
     </div>
 </script>

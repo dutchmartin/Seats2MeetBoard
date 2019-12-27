@@ -6,7 +6,9 @@ Vue.component('meeting-card', {
     props: {
       companyName: String,
       meetingTitle: String,
-      spaceTitle: String
+      spaceName: String,
+      StartMinutes: Number,
+      EndMinutes: Number
     },
     data() {
       return {
@@ -214,4 +216,14 @@ var board = new Vue({
             return `${this.azureStorageUrl}${prefix}/${size}${filenameNoExtension}${imageExtension}`;
           }
     }
+  })
+
+
+  /**
+   * Filters
+   */
+  Vue.filter('minutesToTime', val => {
+    let realmin = val % 60
+    let hours = Math.floor(val / 60)
+    return ('0' + hours).slice(-2) + ':' + ('0' + realmin).slice(-2)
   })
