@@ -32,7 +32,7 @@ var board = new Vue({
             apiUrl: 'https://www.seats2meet.com/api',
             apiNewUrl: 'https://api.seats2meet.com/api/v1',
             apiToken: 398140257,
-            azureStorageUrl: 'https://az691754.vo.msecnd.net/website',
+            currentTime: new Date(),
             greetingTextInterval: null,
             greetingTextIntervalTimer: 6000,
             greetingTextIndex: 0,
@@ -42,12 +42,14 @@ var board = new Vue({
                 'Welkom',
                 'Wat is jouw meetingspace vandaag?'
             ],
-            initialLoadReady: false, 
+            initialLoadReady: false,
+            languageId: 65,
             locationId: 85,
             location: null,
             meetings: [],
             spaces: [],
             virtualManager: null,
+            timeInterval: null
         }
     },
 
@@ -56,12 +58,30 @@ var board = new Vue({
     },
 
     beforeDestroy() {
-        clearInterval(self.greetingTextInterval);
+        clearInterval(this.greetingTextInterval);
+        clearInterval(this.timeInterval);
     },
 
     methods: {
         init(){
             let self = this;
+
+            // Set current time
+            this.timeInterval = setInterval(() => {
+                self.currentTime = new Date();
+            }, 1000 * 60);
+            
+            // Set locale
+            let locale = 'en'
+            var url = new URL(window.location.href);
+            if(url.searchParams.has('locale')) {
+                locale = url.searchParams.get('locale');
+            }
+            this.setLanguageId(locale);
+
+            /**
+             * Load data
+             */
             axios.all([this.getLocation(), this.getSpaces(), this.getVirtualManager(), this.getPublicEvents()])
             .then(axios.spread(function (locationResponse, spacesResponse, virtualManagerResponse, publicEventsResponse) {
               /**
@@ -76,7 +96,7 @@ var board = new Vue({
 
               // Process spaces
               if(spacesResponse.status === 200) {
-                self.spaces = spacesResponse.data.Results;
+                self.spaces = spacesResponse.data.Results.filter(room => !room.Name.startsWith('[hidden]'));
               }
 
               // Process virtual  manager
@@ -87,7 +107,7 @@ var board = new Vue({
 
               // Process events
               if(publicEventsResponse.status === 200) {
-                self.meetings = publicEventsResponse.data.filter(e => e.Id.startsWith('R'));
+                  self.processMeetings(publicEventsResponse.data.filter(e => e.Id.startsWith('R')));
               }
             }))
             .finally(function(){
@@ -98,7 +118,7 @@ var board = new Vue({
                       } else {
                         self.greetingTextIndex = self.greetingTextIndex + 1
                       }
-                }, 6000)
+                }, 6000);
             });
         },
 
@@ -173,57 +193,52 @@ var board = new Vue({
         },
 
         /**
-         * Build virtual manage image url
-         * @param {string} filename 
-         * @param {number} locationId 
-         * @param {number} size
+         * Process meetings
+         * Add meetings in current meetingspace
+         * @param {array} meetings 
          */
-        getVirtualManagerImageSrc(filename = '', locationId = 0, size = null) {
-            let virtualManagerPhotoSize = {
-                80: '84x84_',
-                160: '160x160_',
-                240: '240x240_'
-              };
+        processMeetings(meetingsData) {
+            let self = this
+            let _meetings = [];
 
-            if (filename === '' || locationId === 0) {
-              return '';
+            /**
+             * Build meetings array
+             */
+            this.spaces.forEach(function(space){
+                let description = space.Descriptions.find(d => d.LanguageId === self.languageId);
+                _meetings.push({
+                    InternalName: space.Name,
+                    Name: description.Name,
+                    Meetings: []
+                });
+            });
+
+            /**
+             * Add meetings to current space
+             */
+            for(let i = 0, l = meetingsData.length; i < l; i++) {
+                for(let x = 0, lx = meetingsData[i].Meetingspaces.length; x < lx; x++) {
+                    let meeting = meetingsData[i];
+                    let spaceIndex = _meetings.findIndex(s => s.InternalName === meeting.Meetingspaces[x]);
+                    _meetings[spaceIndex].Meetings.push(meeting)
+                }
             }
-            if (size === null || size === 0) {
-              // Original photo size
-              return `${this.azureStorageUrl}/${locationId.toString()}/${filename}`;
-            } else {
-              return this.getSizedJPGVersion(locationId.toString(), filename, virtualManagerPhotoSize[size]);
+
+            /**
+             * Order
+             */
+            for(let i in _meetings) {
+                _meetings[i].Meetings = this.$options.filters.sortedItems(_meetings[i].Meetings, 'StartMinutes')
             }
+            this.meetings = _meetings;
         },
 
         /**
-         * Get sized JPG version
-         * @param {string} prefix 
-         * @param {string} filename 
-         * @param {string} size 
+         * Set language ID
+         * @param {string} val 
          */
-        getSizedJPGVersion(prefix = '', filename = '', size = '') {
-            if (prefix !== '') {
-              prefix = '/' + prefix;
-            }
-          
-            let filenameNoExtension = filename.substring(0, filename.lastIndexOf('.'));
-          
-            let position = Number(filename.indexOf('.'));
-            let imageLength = Number(filename.length);
-            let imageExtension = filename.substring(position, imageLength);
-          
-            return `${this.azureStorageUrl}${prefix}/${size}${filenameNoExtension}${imageExtension}`;
-          }
+        setLanguageId(val) {
+            this.languageId = (val === 'nl') ? 52 : 65;
+        }
     }
-  })
-
-
-  /**
-   * Filters
-   */
-  Vue.filter('minutesToTime', val => {
-    let realmin = val % 60
-    let hours = Math.floor(val / 60)
-    return ('0' + hours).slice(-2) + ':' + ('0' + realmin).slice(-2)
-  })
+  });

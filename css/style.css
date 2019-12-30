@@ -1,17 +1,36 @@
-body{
-    color: black;
-    word-wrap: break-word;
-    background-color: #eee;
-}
-
 * {
     box-sizing: border-box;
     font-family: 'Open Sans', Tahoma, Arial;
 }
 
-.topbar {
+body{
+    color: black;
+    word-wrap: break-word;
+    background-color: #eee;
+    overflow: hidden;
+}
+
+#board {
+    overflow: hidden;
+    width: 100vw;
+    height: 100vw;
+}
+
+.tilesContainer {
+    display: flex;
+    flex-direction: column;
+}
+
+.tilesContainer .topbar {
+    display: flex;
+    flex-grow: 0;
     padding: 15px;
     background-color: #fec632;
+}
+
+.tilesContainer .container-fluid {
+    overflow: hidden;
+    height: 100%;
 }
 
 .hostImage {
@@ -23,9 +42,12 @@ body{
     background-repeat: no-repeat;
     background-position: center;
 }
+
+/* Greeting text */
 .greetingText-container {
     display: flex;
     align-items: center;
+    flex-grow: 1;
 }
 .greetingText-container .text {
     background-color: whitesmoke;
@@ -33,12 +55,27 @@ body{
     padding: 15px;
 }
 
+/* Clock */
+.clock-container {
+    display: flex;
+    align-items: center;
+}
+.clock-container .clock {
+    background-color: whitesmoke;
+    font-weight: 600;
+    padding: 15px;
+}
+.clock-container .clock .blink {
+    animation: blinker 1s linear infinite;
+}
+
 /* Board grid */
 #content-cards-holder .col {
     padding: 15px;
-    -ms-flex: 0 0 20%;
-    flex: 0 0 20%;
-    max-width: 20%;
+    -ms-flex: 0 0 25%;
+    flex: 0 0 25%;
+    max-width: 25%;
+    overflow: hidden;
 }
 
 /* 
@@ -52,12 +89,13 @@ body{
     height: 100%;
     border: 5px solid #00677a;
     border-radius: 15px;
-    padding: 15px;
+    padding: 15px 15px 0 15px;
     text-align: center;
 }
 
 .spaceTile .top {
     flex-grow: 1;
+    padding-bottom: 15px;
 }
 
 .spaceTile .spaceName {
@@ -70,47 +108,13 @@ body{
 .spaceTile .meetingTitle {
     font-weight: 600;
     font-size: 20px;
-    margin-bottom: 30px;
+    margin-bottom: 15px;
 }
 
-/* #roomtilecurrent{
-    max-width: 400px;
-    height: 225px;
-} */
-/*  */
-/* .roomtitle{
-    font-weight: bold;
-    font-size: larger;
+.spaceTile .bottom {
+    background-color: #00677a;
+    color: whitesmoke;
 }
-
-.bookedtime{
-    font-weight: lighter;
-}
-.coursetitle{
-    font-weight: bold;
-    font-size: x-large;
-}
-.companytitle{
-    font-weight: normal;
-    font-size: larger;
-}
-.next-company{
-    font-weight: lighter;
-    font-size: smaller;
-}
-#content-cards-holder{
-    align-items: center;
-    justify-content: center;
-} */
-/* #hello-header {
-    text-align: center;
-    color: #004F32;
-    background-color: white;
-    border-bottom: 3px solid #87D628;
-} */
-
-
-
 
 /**
 TRANSITIONS
@@ -172,3 +176,12 @@ TRANSITIONS
     -webkit-transform: scale(1);
   }
 }
+
+/**
+BLINK ANIMATION
+*/
+@keyframes blinker {
+    50% {
+      opacity: 0;
+    }
+  }

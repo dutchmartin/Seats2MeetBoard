@@ -28,65 +28,66 @@
 </head>
 
 <body>
-<!-- <div id="hello-header">
-    <h2>Welkom bij Seats2meet Utrecht CS</h2>
-</div> -->
-
 <div id="board">
 <transition name="fade" mode="out-in">
     <div v-if="!initialLoadReady" key="initialLoadNotReady">
         <h2>Is loading ....</h2>
     </div>
-    <div v-if="initialLoadReady" key="initialLoadReady" class="container-fluid">
-        <div class="row topbar">
-            <span v-if="virtualManager && virtualManager.Image !== ''"
-                :style="{backgroundImage: `url(${getVirtualManagerImageSrc(virtualManager.Image, locationId, 160)})`}"
-                id="hostImage" class="hostImage shadow-sm rounded-circle"></span>
-            <span class="greetingText-container">
-                <transition
-                    name="fade"
-                    mode="out-in"
-                >
-                    <span
-                        :key="greetingTextIndex"
-                        class="text h3 rounded-lg"
-                        v-html="greetingTexts[greetingTextIndex]"
-                    ></span>
-                </transition>
-            </span>
-        </div>
+    <div v-if="initialLoadReady" key="initialLoadReady" class="tilesContainer">
+    <div ref="topbar" class="topbar">
+        <span v-if="virtualManager && virtualManager.Image !== ''"
+            :style="{backgroundImage: `url(${$options.filters.getVirtualManagerImageSrc(virtualManager.Image, locationId, 160)})`}"
+            id="hostImage" class="hostImage shadow-sm rounded-circle"></span>
+        <span class="greetingText-container">
+            <transition
+                name="fade"
+                mode="out-in"
+            >
+                <span
+                    :key="greetingTextIndex"
+                    class="text h3 rounded-lg"
+                    v-html="greetingTexts[greetingTextIndex]"
+                ></span>
+            </transition>
+        </span>
+        <span class="clock-container">
+            <span v-html="$options.filters.timeNotation(currentTime)" class="clock h3 rounded-lg"></span>
+        </span>
+    </div>
+    <div ref="contentContainer" class="container-fluid">
         <div class="row" id="content-cards-holder">
             <div v-for="(item, index) in meetings" :key="'ms_' + index" class="col">
                 <meeting-card
-                    :company-name="item.CompanyName"
-                    :meeting-title="item.Name"
-                    :space-name="item.Meetingspaces[0]"
-                    :start-minutes="item.StartMinutes"
-                    :end-minutes="item.EndMinutes">
+                    v-if="item.Meetings.length"
+                    :company-name="item.Meetings[0].CompanyName"
+                    :meeting-title="item.Meetings[0].Name"
+                    :space-name="item.Name"
+                    :start-minutes="item.Meetings[0].StartMinutes"
+                    :end-minutes="item.Meetings[0].EndMinutes">
                 </meeting-card>
             </div>
         </div>
     </div>
+    </div>
     </transition>
 </div>
 <!-- Bootstrap core JavaScript -->
+    <script src="js/helpers.js" defer></script>
     <script src="js/app.js" defer></script>
 
 <script type="text/x-template" id="meetingCard">
     <div class="spaceTile shadow-sm">
         <div class="top">
             <div class="spaceName">
-            {{ spaceName }}
+                <strong>{{ spaceName }}</strong><br />
+                <span>{{ StartMinutes | minutesToTime }} - {{ EndMinutes | minutesToTime }}</span>
             </div>
             <div class="meetingTitle">
-            {{ meetingTitle }}
+                {{ meetingTitle }}
             </div>
             <div class="companyName">
-            {{ companyName }}
+                {{ companyName }}
             </div>
-        </div>
-        <div class="bottom">
-        {{ StartMinutes | minutesToTime }} - {{ EndMinutes | minutesToTime }}
         </div>
     </div>
 </script>
