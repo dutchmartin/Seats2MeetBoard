@@ -26,37 +26,35 @@ Vue.component('space-card', {
     
     methods: {
         showBooking() {
+            let self = this;
+
             /**
              * ToDo: get current meeting
              */
-            // console.info('>>> ' + this.$options.filters.timeToMinutes(this.currentTime))
             let currentMinutes =  this.$options.filters.timeToMinutes(this.currentTime);
             let currentMeeting = null;
 
-            currentMeeting = this.meetings.find((_meeting, index) => {
+            for(let i in this.meetings) {
+                console.info(Number(i + 1) + ' - ' + this.meetings.length);
+                let _meeting = this.meetings[i];
                 let _startMinutes = _meeting.StartMinutes - 30;
                 let _endMinutes = _meeting.EndMinutes - 30;
+
                 if((currentMinutes >= _startMinutes && currentMinutes <= _endMinutes)) {
-                    return _meeting
+                    currentMeeting = _meeting;
+                    break;
                 }
-            });
+                // Return next meeting when
+                // if(Number(i + 1) < this.meetings.length 
+                //     && (currentMinutes >= _endMinutes && this.meetings[Number(i + 1)].StartMinutes <= currentMinutes)) {
+                //     currentMeeting = this.meetings[i + 1];
+                //     break;
+                // }
+            }
 
             if(currentMeeting) {
                 this.meeting = currentMeeting;
             }
-
-            // for(let i in this.meetings) {
-            //     let _meeting = this.meetings[i];
-            //     let _startMinutes = _meeting.StartMinutes - 30;
-            //     let _endMinutes = _meeting.endMinutes - 30;
-
-            //     // f (z >= x && z <= y)
-            //     if(currentMinutes >= _startMinutes && currentMinutes <= _endMinutes) {
-
-            //     }
-            // }
-
-            // this.meeting = this.meetings[0]
         }
     }
   })
