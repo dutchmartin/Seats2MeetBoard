@@ -8,12 +8,10 @@
     <meta name="author" content="Martijn Groeneveldt">
 
     <title>wegwijs</title>
-
-    <!-- Bootstrap core CSS -->
     
     <!-- PRODUCTION -->
-    <!-- <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vue"></script> -->
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <!-- <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script> -->
     
     <!-- DEVELOPMENT -->
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
@@ -29,71 +27,70 @@
 
 <body>
 <div id="board">
-<transition name="fade" mode="out-in">
-    <div v-if="!initialLoadReady" key="initialLoadNotReady">
-        <h2>Is loading ....</h2>
-    </div>
-    <div v-if="initialLoadReady" key="initialLoadReady" class="tilesContainer">
-    <div ref="topbar" class="topbar">
-        <span v-if="virtualManager && virtualManager.Image !== ''"
-            :style="{backgroundImage: `url(${$options.filters.getVirtualManagerImageSrc(virtualManager.Image, locationId, 160)})`}"
-            id="hostImage" class="hostImage shadow-sm rounded-circle"></span>
-        <span class="greetingText-container">
-            <transition
-                name="fade"
-                mode="out-in"
-            >
-                <span
-                    :key="greetingTextIndex"
-                    class="text h3 rounded-lg"
-                    v-html="greetingTexts[greetingTextIndex]"
-                ></span>
-            </transition>
-        </span>
-        <span class="clock-container">
-            <span v-html="$options.filters.timeNotation(currentTime)" class="clock h3 rounded-lg"></span>
-        </span>
-    </div>
-    <div ref="contentContainer" class="container-fluid">
-        <div class="row" id="content-cards-holder">
-            <div v-for="(item, index) in meetings" :key="'ms_' + index" class="col">
-                <meeting-card
-                    v-if="item.Meetings.length"
-                    :company-name="item.Meetings[0].CompanyName"
-                    :meeting-title="item.Meetings[0].Name"
-                    :space-name="item.Name"
-                    :start-minutes="item.Meetings[0].StartMinutes"
-                    :end-minutes="item.Meetings[0].EndMinutes">
-                </meeting-card>
+    <transition v-on:enter="calculateContentHeight" name="fade" mode="out-in">
+        <div id="loadingContainer" v-if="!initialLoadReady" key="initialLoadNotReady">
+            <h2>Loading ....</h2>
+        </div>
+        <div v-if="initialLoadReady" key="initialLoadReady" class="tilesContainer">
+            <div ref="topbar" class="topbar">
+                <span v-if="virtualManager && virtualManager.Image !== ''"
+                    :style="{backgroundImage: `url(${$options.filters.getVirtualManagerImageSrc(virtualManager.Image, locationId, 160)})`}"
+                    id="hostImage" class="hostImage shadow-sm rounded-circle"></span>
+                <span class="greetingText-container">
+                    <transition
+                        name="fade"
+                        mode="out-in"
+                    >
+                        <span
+                            :key="greetingTextIndex"
+                            class="text h3 rounded-lg"
+                            v-html="greetingTexts[greetingTextIndex]"
+                        ></span>
+                    </transition>
+                </span>
+                <span class="clock-container">
+                    <span v-html="$options.filters.timeNotation(currentTime)" class="clock h3 rounded-lg"></span>
+                </span>
+            </div>
+            <div ref="contentContainer" class="container-fluid">
+                <transition name="slide-fade" mode="out-in">
+                    <div class="row" id="content-cards-holder" :key="'page_' + page">
+                        <div v-for="(item, index) in meetings.slice(((page -1) * itemsPerPage), (page * itemsPerPage))" :key="'ms_' + index" class="col">
+                            <space-card
+                                :key="item.SpaceId + '_' + currentTime.getTime()"
+                                :meetings="item.Meetings"
+                                :space-name="item.Name"
+                                :current-time="currentTime"
+                            />
+                        </div>
+                    </div>
+                </transition>
             </div>
         </div>
-    </div>
-    </div>
     </transition>
 </div>
-<!-- Bootstrap core JavaScript -->
-    <script src="js/helpers.js" defer></script>
-    <script src="js/app.js" defer></script>
 
-<script type="text/x-template" id="meetingCard">
+<script src="js/helpers.js" defer></script>
+<script src="js/components/spaceCard.js" defer></script>
+<script src="js/app.js" defer></script>
+
+<script type="text/x-template" id="spaceCard">
     <div class="spaceTile shadow-sm">
-        <div class="top">
-            <div class="spaceName">
-                <strong>{{ spaceName }}</strong><br />
-                <span>{{ StartMinutes | minutesToTime }} - {{ EndMinutes | minutesToTime }}</span>
-            </div>
+        <div class="spaceName">
+            <strong>{{ spaceName }}</strong><br />
+            <span v-if="meeting">{{ meeting.StartMinutes | minutesToTime }} - {{ meeting.EndMinutes | minutesToTime }}</span>
+            <span v-if="!meeting">&nbsp;</span>
+        </div>
+        <div v-if="meeting">
             <div class="meetingTitle">
-                {{ meetingTitle }}
+                {{ meeting.Name }}
             </div>
             <div class="companyName">
-                {{ companyName }}
+                {{ meeting.CompanyName }}
             </div>
         </div>
     </div>
 </script>
-
-<!-- <script src="vendor/jquery/jquery.slim.min.js"></script>
-<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script> -->
 
 </body>
 

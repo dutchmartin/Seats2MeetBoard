@@ -1,26 +1,4 @@
 /**
- * Register the meeting card component
- */
-Vue.component('meeting-card', {
-    template: '#meetingCard',
-    props: {
-      companyName: String,
-      meetingTitle: String,
-      spaceName: String,
-      StartMinutes: Number,
-      EndMinutes: Number
-    },
-    data() {
-      return {
-      }
-    },
-    
-    methods: {
-    }
-  })
-
-
-/**
  * App startup code
  */
 var board = new Vue({
@@ -49,7 +27,11 @@ var board = new Vue({
             meetings: [],
             spaces: [],
             virtualManager: null,
-            timeInterval: null
+            timeInterval: null,
+            page: 1,
+            noPages: 0,
+            itemsPerPage: 0,
+            pageInterval: null
         }
     },
 
@@ -59,10 +41,42 @@ var board = new Vue({
 
     beforeDestroy() {
         clearInterval(this.greetingTextInterval);
+        clearInterval(this.pageInterval);
         clearInterval(this.timeInterval);
     },
 
     methods: {
+        /**
+         * Calculate content container height
+         * and determine how many items must show on page
+         */
+        calculateContentHeight() {
+            let self = this;
+
+            if(this.pageInterval !== null) {
+                clearTimeout(pageInterval);
+            }
+
+            let h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+            let contentHeight = h - this.$refs.topbar.clientHeight;
+            
+            this.itemsPerPage = 16;
+            if(contentHeight < 980) {
+                this.itemsPerPage = 12;
+            }
+            this.noPages = Math.ceil(this.meetings.length / this.itemsPerPage);
+            this.pageInterval = setInterval(function(){
+                if(self.noPages === self.page) {
+                    self.page = 1;
+                } else {
+                    self.page = self.page + 1;
+                }
+            }, 1000 * 10);
+        },
+        
+        /**
+         * Startup project
+         */
         init(){
             let self = this;
 
@@ -207,6 +221,7 @@ var board = new Vue({
             this.spaces.forEach(function(space){
                 let description = space.Descriptions.find(d => d.LanguageId === self.languageId);
                 _meetings.push({
+                    SpaceId: space.Id,
                     InternalName: space.Name,
                     Name: description.Name,
                     Meetings: []
@@ -228,8 +243,17 @@ var board = new Vue({
              * Order
              */
             for(let i in _meetings) {
-                _meetings[i].Meetings = this.$options.filters.sortedItems(_meetings[i].Meetings, 'StartMinutes')
+                _meetings[i].Meetings.sort((a, b) => {
+                    if (a.EndMinutes < b.EndMinutes) {
+                        return -1;
+                    }
+                    if (a.EndMinutes > b.EndMinutes) {
+                        return 1;
+                    }
+                    return 0;
+                })
             }
+            
             this.meetings = _meetings;
         },
 
