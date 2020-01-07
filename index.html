@@ -8,28 +8,95 @@
     <meta name="author" content="Martijn Groeneveldt">
 
     <title>wegwijs</title>
-
-    <!-- Bootstrap core CSS -->
+    
+    <!-- PRODUCTION -->
+    <!-- <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vue"></script> -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    
+    <!-- DEVELOPMENT -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
+    
+    <!-- CSS files -->
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,500italic,400,500,600" rel="stylesheet">
     <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
 
     <!-- js files-->
     <script src="js/moment.min.js" defer></script>
-    <script src="js/main.js" defer></script>
 </head>
 
 <body>
-<div id="hello-header">
-    <h2>Welkom bij Seats2meet Utrecht CS</h2>
+<div id="board">
+    <transition v-on:enter="calculateContentHeight" name="fade" mode="out-in">
+        <div id="loadingContainer" v-if="!initialLoadReady" key="initialLoadNotReady">
+            <h2>Loading ....</h2>
+        </div>
+        <div v-if="initialLoadReady" key="initialLoadReady" class="tilesContainer">
+            <div ref="topbar" class="topbar">
+                <span v-if="virtualManager && virtualManager.Image !== ''"
+                    :style="{backgroundImage: `url(${$options.filters.getVirtualManagerImageSrc(virtualManager.Image, locationId, 160)})`}"
+                    id="hostImage" class="hostImage shadow-sm rounded-circle"></span>
+                <span class="greetingText-container">
+                    <transition
+                        name="fade"
+                        mode="out-in"
+                    >
+                        <span
+                            :key="greetingTextIndex"
+                            class="text h3 rounded-lg"
+                            v-html="hostTexts[greetingTextIndex]"
+                        ></span>
+                    </transition>
+                </span>
+                <span class="clock-container">
+                    <span v-html="$options.filters.timeNotation(currentTime)" class="clock h3 rounded-lg"></span>
+                </span>
+            </div>
+            <div v-if="locationId" ref="contentContainer" class="container-fluid">
+                <transition name="slide-fade" mode="out-in">
+                    <div class="row" id="content-cards-holder" :key="'page_' + page">
+                        <div v-for="(item, index) in meetings.slice(((page -1) * itemsPerPage), (page * itemsPerPage))" :key="'ms_' + index" class="col">
+                            <space-card
+                                :key="item.SpaceId + '_' + currentTime.getTime()"
+                                :meetings="item.Meetings"
+                                :space-name="item.Name"
+                                :current-time="currentTime"
+                            />
+                        </div>
+                    </div>
+                </transition>
+            </div>
+            <div v-else>
+                <div class="alert alert-warning" role="alert">
+                    Location ID is missing. Add your location number to the URL. For example:
+                    {{ webUrl }}?locale=nl&l=85
+                </div>
+            </div>
+        </div>
+    </transition>
 </div>
-<div class="container-fluid">
-    <div class="row" id="content-cards-holder">
-        <!-- Content -->
+
+<script src="js/helpers.js" defer></script>
+<script src="js/components/spaceCard.js" defer></script>
+<script src="js/app.js" defer></script>
+
+<script type="text/x-template" id="spaceCard">
+    <div class="spaceTile shadow-sm">
+        <div class="spaceName">
+            <strong>{{ spaceName }}</strong><br />
+            <span v-if="meeting">{{ meeting.StartMinutes | minutesToTime }} - {{ meeting.EndMinutes | minutesToTime }}</span>
+            <span v-if="!meeting">&nbsp;</span>
+        </div>
+        <div v-if="meeting">
+            <div class="meetingTitle">
+                {{ meeting.Name }}
+            </div>
+            <div class="companyName">
+                {{ meeting.CompanyName }}
+            </div>
+        </div>
     </div>
-</div>
-<!-- Bootstrap core JavaScript -->
-<script src="vendor/jquery/jquery.slim.min.js"></script>
-<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+</script>
 
 </body>
 
