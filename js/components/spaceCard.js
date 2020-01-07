@@ -43,12 +43,20 @@ Vue.component('space-card', {
                     currentMeeting = _meeting;
                     break;
                 }
+
                 // Return next meeting when
-                // if(Number(i + 1) < this.meetings.length 
-                //     && (currentMinutes >= _endMinutes && this.meetings[Number(i + 1)].StartMinutes <= currentMinutes)) {
-                //     currentMeeting = this.meetings[i + 1];
-                //     break;
-                // }
+                if(Number(i + 1) < this.meetings.length) {
+                    // console.info(currentMinutes, this.meetings[Number(i + 1)].StartMinutes);
+                    // if(currentMinutes >= _endMinutes && currentMinutes <= this.meetings[Number(i + 1)].StartMinutes) {
+                        currentMeeting = this.meetings[i + 1];
+                        break;
+                    // }
+                }
+                else if(this.meetings.length === 1) {
+                    if(currentMinutes <= this.meetings[i].StartMinutes) {
+                        currentMeeting = this.meetings[i];
+                    }
+                }
             }
 
             if(currentMeeting) {
