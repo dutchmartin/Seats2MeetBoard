@@ -35,7 +35,6 @@ Vue.component('space-card', {
             let currentMeeting = null;
 
             for(let i in this.meetings) {
-                console.info(Number(i + 1) + ' - ' + this.meetings.length);
                 let _meeting = this.meetings[i];
                 let _startMinutes = _meeting.StartMinutes - 30;
                 let _endMinutes = _meeting.EndMinutes - 30;

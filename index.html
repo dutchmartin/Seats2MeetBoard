@@ -44,7 +44,7 @@
                         <span
                             :key="greetingTextIndex"
                             class="text h3 rounded-lg"
-                            v-html="greetingTexts[greetingTextIndex]"
+                            v-html="hostTexts[greetingTextIndex]"
                         ></span>
                     </transition>
                 </span>
@@ -52,7 +52,7 @@
                     <span v-html="$options.filters.timeNotation(currentTime)" class="clock h3 rounded-lg"></span>
                 </span>
             </div>
-            <div ref="contentContainer" class="container-fluid">
+            <div v-if="locationId" ref="contentContainer" class="container-fluid">
                 <transition name="slide-fade" mode="out-in">
                     <div class="row" id="content-cards-holder" :key="'page_' + page">
                         <div v-for="(item, index) in meetings.slice(((page -1) * itemsPerPage), (page * itemsPerPage))" :key="'ms_' + index" class="col">
@@ -65,6 +65,12 @@
                         </div>
                     </div>
                 </transition>
+            </div>
+            <div v-else>
+                <div class="alert alert-warning" role="alert">
+                    Location ID is missing. Add your location number to the URL. For example:
+                    {{ webUrl }}?locale=nl&l=85
+                </div>
             </div>
         </div>
     </transition>

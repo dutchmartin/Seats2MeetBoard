@@ -11,27 +11,44 @@ var board = new Vue({
             apiNewUrl: 'https://api.seats2meet.com/api/v1',
             apiToken: 398140257,
             currentTime: new Date(),
+            currentHour: new Date().getHours(),
+            getPublicEventsToken: null,
             greetingTextInterval: null,
             greetingTextIntervalTimer: 6000,
             greetingTextIndex: 0,
-            greetingTexts: [
-                this.getGreetingText(),
-                'Leuk dat je er bent!',
-                'Welkom',
-                'Wat is jouw meetingspace vandaag?'
-            ],
+            greetingTexts: {
+                en: [
+                    ['Good morning','Good afternoon','Good evening'],
+                    'Nice to have you here!',
+                    'Welcome to ##locationName##',
+                    'My name is ##host##, I am the host at this location',
+                    'What is your meeting space today?'
+                ],
+                nl: [
+                    ['Goedemorgen','Goedemiddag','Goedenavond'],
+                    'Leuk dat je er bent!',
+                    'Welkom bij ##locationName##',
+                    'Mijn naam is ##host##, Ik ben de host op deze locatie',
+                    'Wat is jouw meetingspace vandaag?'
+                ]
+            },
+            hostTexts: [],
             initialLoadReady: false,
             languageId: 65,
-            locationId: 85,
+            locale: 'nl',
+            locationId: 0,
             location: null,
             meetings: [],
             spaces: [],
+            specificMeetingDay: '',
             virtualManager: null,
             timeInterval: null,
             page: 1,
+            pageAnimationSpeed: 10, // 10 seconds
             noPages: 0,
             itemsPerPage: 0,
-            pageInterval: null
+            pageInterval: null,
+            webUrl: window.location.href
         }
     },
 
@@ -53,10 +70,6 @@ var board = new Vue({
         calculateContentHeight() {
             let self = this;
 
-            if(this.pageInterval !== null) {
-                clearTimeout(pageInterval);
-            }
-
             let h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
             let contentHeight = h - this.$refs.topbar.clientHeight;
             
@@ -64,14 +77,12 @@ var board = new Vue({
             if(contentHeight < 980) {
                 this.itemsPerPage = 12;
             }
-            this.noPages = Math.ceil(this.meetings.length / this.itemsPerPage);
-            this.pageInterval = setInterval(function(){
-                if(self.noPages === self.page) {
-                    self.page = 1;
-                } else {
-                    self.page = self.page + 1;
-                }
-            }, 1000 * 10);
+             
+            /**
+             * Start page animation
+             * This will be triggerd when transition is ready
+             */
+            this.animatePages();
         },
         
         /**
@@ -79,24 +90,47 @@ var board = new Vue({
          */
         init(){
             let self = this;
+            let url = new URL(window.location.href);
 
-            // Set current time
+            /**
+             * Set current time
+             */
             this.timeInterval = setInterval(() => {
                 self.currentTime = new Date();
             }, 1000 * 60);
             
-            // Set locale
-            let locale = 'en'
-            var url = new URL(window.location.href);
+            /**
+             * Set locale
+             */
             if(url.searchParams.has('locale')) {
-                locale = url.searchParams.get('locale');
+                this.locale = url.searchParams.get('locale');
             }
-            this.setLanguageId(locale);
+            this.setLanguageId(this.locale);
+
+            /**
+             * Get location ID
+             */
+            if(url.searchParams.has('l')) {
+                this.locationId = url.searchParams.get('l');
+            }
+            else {
+                this.initialLoadReady = true;
+                return;
+            }
+
+            /**
+             * Specific day
+             * Only used for development
+             * yyyy-mm-dd
+             */
+            if(url.searchParams.has('d')) {
+                this.specificMeetingDay = url.searchParams.get('d')
+            }
 
             /**
              * Load data
              */
-            axios.all([this.getLocation(), this.getSpaces(), this.getVirtualManager(), this.getPublicEvents()])
+            axios.all([this.getLocation(), this.getSpaces(), this.getVirtualManager(), this.getPublicEvents(this.specificMeetingDay, this.currentTime)])
             .then(axios.spread(function (locationResponse, spacesResponse, virtualManagerResponse, publicEventsResponse) {
               /**
                * Requests are now complete 
@@ -105,7 +139,7 @@ var board = new Vue({
               // Process location data
               if(locationResponse.status === 200) {
                 self.location = locationResponse.data;
-                self.greetingTexts[2] += '  bij ' + self.location.Name;
+                
               }
 
               // Process spaces
@@ -115,7 +149,6 @@ var board = new Vue({
 
               // Process virtual  manager
               if(virtualManagerResponse.status === 200) {
-                self.greetingTexts.splice(3, 0, 'Mijn naam is '+ virtualManagerResponse.data.Name +', Ik ben de host op deze locatie');
                 self.virtualManager = virtualManagerResponse.data;
               }
 
@@ -126,27 +159,75 @@ var board = new Vue({
             }))
             .finally(function(){
                 self.initialLoadReady = true;
-                self.greetingTextInterval = setInterval(function() {
-                    if (self.greetingTextIndex >= self.greetingTexts.length - 1) {
-                        self.greetingTextIndex = 0
-                      } else {
-                        self.greetingTextIndex = self.greetingTextIndex + 1
-                      }
-                }, 6000);
+                self.buildHostTexts();
             });
         },
 
         /**
-         * Get greeting text
+         * Page animation
          */
-        getGreetingText() {
+        animatePages(){
+            let self = this;
+            
+            this.noPages = Math.ceil(this.meetings.length / this.itemsPerPage);
+            if(this.pageInterval !== null) {
+                clearInterval(this.pageInterval);
+            }
+            this.page = 1;
+            if(this.noPages > 1) {
+                this.pageInterval = setInterval(function(){
+                    if(self.noPages === self.page) {
+                        self.page = 1;
+                    } else {
+                        self.page = self.page + 1;
+                    }
+                }, 1000 * this.pageAnimationSpeed);
+            }
+        },
+
+        /**
+         * Build host texts
+         */
+        buildHostTexts(){
+            let self = this;
+            
+            this.hostTexts.push(self.greetingTexts[self.locale][0][self.getDayTimeIndex()]);
+            this.hostTexts.push(this.greetingTexts[this.locale][1]);
+            if(this.location){
+                this.hostTexts.push(this.greetingTexts[this.locale][2].replace('##locationName##', this.location.Name));
+            }
+            if(this.virtualManager) {
+                this.hostTexts.push(this.greetingTexts[this.locale][3].replace('##host##', this.virtualManager.Name));
+                
+            }
+            this.hostTexts.push(this.greetingTexts[this.locale][4]);
+            this.greetingTextInterval = setInterval(function() {
+                if (self.greetingTextIndex >= self.hostTexts.length - 1) {
+                    self.hostTexts[0] = self.greetingTexts[self.locale][0][self.getDayTimeIndex()];
+                    self.greetingTextIndex = 0
+                  } else {
+                    self.greetingTextIndex = self.greetingTextIndex + 1
+                  }
+            }, 6000);
+        },
+
+        /**
+         * Get day time index
+         */
+        getDayTimeIndex() {
             let d = new Date()
+
+            if(d.getHours() !== this.currentHour) {
+                this.updateMeetings()
+                this.currentHour = d.getHours();
+            }
+
             if (d.getHours() < 12) {
-            return 'Goedemorgen';
+                return 0;
             } else if (d.getHours() >= 12 && d.getHours() < 18) {
-            return 'Goedemiddag';
+                return 1;
             } else {
-            return 'Goedenavond';
+                return 2;
             }
         },
 
@@ -165,14 +246,22 @@ var board = new Vue({
         /**
          * Get public events
          */
-        getPublicEvents() {
+        getPublicEvents(specificMeetingDay, currentTime) {
+            let self = this
+
+            if(this.getPublicEventsToken) {
+                this.getPublicEventsToken.cancel();
+            }
+            this.getPublicEventsToken = axios.CancelToken.source();
+
             return axios.get(this.apiNewUrl + '/event/public/location/' + this.locationId, {
+                cancelToken: self.getPublicEventsToken.token,
                 headers: {
                     'Content-type': 'application/json',
                     apiToken: this.apiToken
                 },
                 params: {
-                    date: '2019-12-12'
+                    date: specificMeetingDay === '' ? self.$options.filters.dateObjectIsoDateString(currentTime) : specificMeetingDay
                 }
             });
         },
@@ -192,6 +281,21 @@ var board = new Vue({
                     itemsPerPage: 0
                 }
             });
+        },
+
+        /**
+         * Update current meetings
+         */
+        updateMeetings() {
+            let self = this;
+            this.getPublicEvents(this.specificMeetingDay, this.currentTime)
+            .then(function(response){
+                if(response.status === 200) {
+                    self.processMeetings(response.data.filter(e => e.Id.startsWith('R')));
+                }
+            })
+            .catch()
+            .finally();
         },
         
         /**
