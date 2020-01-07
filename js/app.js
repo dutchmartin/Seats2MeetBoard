@@ -97,6 +97,11 @@ var board = new Vue({
              */
             this.timeInterval = setInterval(() => {
                 self.currentTime = new Date();
+
+                if(self.currentTime.getHours() !== self.currentHour) {
+                    self.updateMeetings()
+                    self.currentHour = self.currentTime.getHours();
+                }
             }, 1000 * 60);
             
             /**
@@ -220,11 +225,6 @@ var board = new Vue({
          */
         getDayTimeIndex() {
             let d = new Date();
-
-            if(d.getHours() !== this.currentHour) {
-                this.updateMeetings()
-                this.currentHour = d.getHours();
-            }
 
             if (d.getHours() < 12) {
                 return 0;
