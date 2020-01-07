@@ -201,6 +201,10 @@ var board = new Vue({
                 
             }
             this.hostTexts.push(this.greetingTexts[this.locale][4]);
+            
+            if(this.greetingTextInterval) {
+                clearInterval(this.greetingTextInterval);
+            }
             this.greetingTextInterval = setInterval(function() {
                 if (self.greetingTextIndex >= self.hostTexts.length - 1) {
                     self.hostTexts[0] = self.greetingTexts[self.locale][0][self.getDayTimeIndex()];
@@ -215,7 +219,7 @@ var board = new Vue({
          * Get day time index
          */
         getDayTimeIndex() {
-            let d = new Date()
+            let d = new Date();
 
             if(d.getHours() !== this.currentHour) {
                 this.updateMeetings()
