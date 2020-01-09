@@ -39,6 +39,7 @@ var board = new Vue({
             locationId: 0,
             location: null,
             meetings: [],
+            showDate: true,
             spaces: [],
             specificMeetingDay: '',
             virtualManager: null,
@@ -211,6 +212,7 @@ var board = new Vue({
                 clearInterval(this.greetingTextInterval);
             }
             this.greetingTextInterval = setInterval(function() {
+                self.showDate = !self.showDate
                 if (self.greetingTextIndex >= self.hostTexts.length - 1) {
                     self.hostTexts[0] = self.greetingTexts[self.locale][0][self.getDayTimeIndex()];
                     self.greetingTextIndex = 0

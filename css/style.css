@@ -74,9 +74,14 @@ body{
     background-color: whitesmoke;
     font-weight: 600;
     padding: 15px;
+    line-height: 1;
+    text-align: center;
 }
 .clock-container .clock .blink {
     animation: blinker 1s linear infinite;
+}
+.clock-container .datePageInfoContainer {
+  font-size: 50%;
 }
 
 /* Board grid */

@@ -49,7 +49,16 @@
                     </transition>
                 </span>
                 <span class="clock-container">
-                    <span v-html="$options.filters.timeNotation(currentTime)" class="clock h3 rounded-lg"></span>
+                    <span class="clock h3 rounded-lg">
+                        <span v-html="$options.filters.timeNotation(currentTime)"></span>
+                        <br/>
+                        <span class="datePageInfoContainer">
+                            <transition name="fade" mode="out-in">
+                                <span v-if="showDate" key="date" class="date">{{ currentTime.getDate() }}-{{ currentTime.getMonth() + 1 }}-{{ currentTime.getFullYear() }}</span>
+                                <span v-if="!showDate" key="pages">Page: {{ page }}/{{ noPages }}</span>
+                            </transition>
+                        </span>
+                    </span>
                 </span>
             </div>
             <div v-if="locationId" ref="contentContainer" class="container-fluid">
