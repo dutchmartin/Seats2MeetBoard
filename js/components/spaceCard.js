@@ -50,7 +50,6 @@ Vue.component('space-card', {
                     } else if(Number(i + 1) < this.meetings.length) {
                         if(currentMinutes <= this.meetings[Number(i + 1)].StartMinutes) {
                             currentMeeting = this.meetings[Number(i + 1)];
-                            console.info(currentMeeting.Name)
                             break;
                         }
                     }
