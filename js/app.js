@@ -328,6 +328,7 @@ var board = new Vue({
             /**
              * Build meetings array
              */
+            
             this.spaces.forEach(function(space){
                 let description = space.Descriptions.find(d => d.LanguageId === self.languageId);
                 _meetings.push({
@@ -345,7 +346,9 @@ var board = new Vue({
                 for(let x = 0, lx = meetingsData[i].Meetingspaces.length; x < lx; x++) {
                     let meeting = meetingsData[i];
                     let spaceIndex = _meetings.findIndex(s => s.InternalName === meeting.Meetingspaces[x]);
-                    _meetings[spaceIndex].Meetings.push(meeting)
+                    if(spaceIndex !== -1) {
+                        _meetings[spaceIndex].Meetings.push(meeting)
+                    }
                 }
             }
 
