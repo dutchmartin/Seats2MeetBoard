@@ -67,8 +67,8 @@
                         <div v-for="(item, index) in meetings.slice(((page -1) * itemsPerPage), (page * itemsPerPage))" :key="'ms_' + index" class="col">
                             <space-card
                                 :key="item.SpaceId + '_' + currentTime.getTime()"
-                                :meetings="item.Meetings"
-                                :space-name="item.Name"
+                                :meetings="item.Items"
+                                :space-name="item.PublicName"
                                 :current-time="currentTime"
                             />
                         </div>

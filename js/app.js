@@ -136,8 +136,8 @@ var board = new Vue({
             /**
              * Load data
              */
-            axios.all([this.getLocation(), this.getSpaces(), this.getVirtualManager(), this.getPublicEvents(this.specificMeetingDay, this.currentTime)])
-            .then(axios.spread(function (locationResponse, spacesResponse, virtualManagerResponse, publicEventsResponse) {
+            axios.all([this.getLocation(), this.getVirtualManager(), this.getSpaces()])
+            .then(axios.spread(function (locationResponse, virtualManagerResponse, spacesResponse) {
               /**
                * Requests are now complete 
                * */ 
@@ -145,12 +145,6 @@ var board = new Vue({
               // Process location data
               if(locationResponse.status === 200) {
                 self.location = locationResponse.data;
-                
-              }
-
-              // Process spaces
-              if(spacesResponse.status === 200) {
-                self.spaces = spacesResponse.data.Results.filter(room => !room.Name.startsWith('[hidden]'));
               }
 
               // Process virtual  manager
@@ -158,13 +152,14 @@ var board = new Vue({
                 self.virtualManager = virtualManagerResponse.data;
               }
 
-              // Process events
-              if(publicEventsResponse.status === 200) {
-                  self.processMeetings(publicEventsResponse.data.filter(e => e.Id.startsWith('R')));
+              // Process spaces
+              if(spacesResponse.status === 200) {
+                self.spaces = spacesResponse.data.Results.filter(space => !space.Name.startsWith('[hidden]'));
               }
+
+                self.updateMeetings()
             }))
             .finally(function(){
-                self.initialLoadReady = true;
                 self.buildHostTexts();
             });
         },
@@ -288,21 +283,6 @@ var board = new Vue({
                 }
             });
         },
-
-        /**
-         * Update current meetings
-         */
-        updateMeetings() {
-            let self = this;
-            this.getPublicEvents(this.specificMeetingDay, this.currentTime)
-            .then(function(response){
-                if(response.status === 200) {
-                    self.processMeetings(response.data.filter(e => e.Id.startsWith('R')));
-                }
-            })
-            .catch()
-            .finally();
-        },
         
         /**
          * Get virtual manager
@@ -315,59 +295,54 @@ var board = new Vue({
                 }
             });
         },
+        
+        /**
+         * Get schedule
+         */
+        getSchedule(specificMeetingDay, currentTime) {
+            return axios.get(this.apiNewUrl + '/Schedule', {
+                params: {
+                    locationId: this.locationId,
+                    meetingtypeId: 1,
+                    date: specificMeetingDay === '' ? this.$options.filters.dateObjectIsoDateString(currentTime) : specificMeetingDay
+                },
+                headers: {
+                    'Content-type': 'application/json',
+                    apiToken: this.apiToken
+                }
+            });
+        },
 
         /**
-         * Process meetings
-         * Add meetings in current meetingspace
-         * @param {array} meetings 
+         * Update current meetings
          */
-        processMeetings(meetingsData) {
-            let self = this
-            let _meetings = [];
-
-            /**
-             * Build meetings array
-             */
-            
-            this.spaces.forEach(function(space){
-                let description = space.Descriptions.find(d => d.LanguageId === self.languageId);
-                _meetings.push({
-                    SpaceId: space.Id,
-                    InternalName: space.Name,
-                    Name: description.Name,
-                    Meetings: []
-                });
-            });
-
-            /**
-             * Add meetings to current space
-             */
-            for(let i = 0, l = meetingsData.length; i < l; i++) {
-                for(let x = 0, lx = meetingsData[i].Meetingspaces.length; x < lx; x++) {
-                    let meeting = meetingsData[i];
-                    let spaceIndex = _meetings.findIndex(s => s.InternalName === meeting.Meetingspaces[x]);
-                    if(spaceIndex !== -1) {
-                        _meetings[spaceIndex].Meetings.push(meeting)
+        updateMeetings() {
+            let self = this;
+            axios.all([this.getSchedule(this.specificMeetingDay, this.currentTime), this.getPublicEvents(this.specificMeetingDay, this.currentTime)])
+            .then(axios.spread((scheduleResponse, publicEventsResponse) => {
+                let publicEvents = publicEventsResponse.data.filter(e => e.Id.startsWith('R'));
+                let schedule = scheduleResponse.data.Spaces.filter(space => !space.SpaceName.startsWith('[hidden]'));
+                schedule.forEach(space => {
+                    let foundSpace = self.spaces.find(s => s.Id === space.SpaceId)
+                    space.PublicName = ''
+                    if(foundSpace !== 'undefined') {
+                        space.PublicName = foundSpace.Descriptions.find(d => d.LanguageId === self.languageId).Name;
                     }
-                }
-            }
-
-            /**
-             * Order
-             */
-            for(let i in _meetings) {
-                _meetings[i].Meetings.sort((a, b) => {
-                    if (a.EndMinutes < b.EndMinutes) {
-                        return -1;
-                    }
-                    if (a.EndMinutes > b.EndMinutes) {
-                        return 1;
-                    }
-                    return 0;
+                    foundSpace = null
+                    space.Items.forEach(reservation => {
+                        reservation.CompanyName = ''
+                        let foundEvent = publicEvents.find(e => e.ReservationId === reservation.ItemId)
+                        if(foundEvent !== 'undefined') {
+                            reservation.CompanyName = foundEvent.CompanyName
+                        }
+                        foundEvent = null
+                    })
                 })
-            }
-            
-            this.meetings = _meetings;
+                self.meetings = schedule
+            }))
+            .finally(()=> {
+                self.initialLoadReady = true;
+            })
         },
 
         /**
