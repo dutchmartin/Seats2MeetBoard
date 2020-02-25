@@ -66,7 +66,7 @@ var board = new Vue({
     methods: {
         async checkForUpdates() {
             let version = Number(getCookie('version'))
-            const response = await axios.get('/version.json', {
+            const response = await axios.get('version.json', {
                 headers: {
                     'Content-type': 'application/json'
                 }})
