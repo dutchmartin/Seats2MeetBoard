@@ -149,7 +149,7 @@ var board = new Vue({
             }
 
             // Check for update
-            this.checkForUpdates()
+            // this.checkForUpdates()
 
             /**
              * Load data
