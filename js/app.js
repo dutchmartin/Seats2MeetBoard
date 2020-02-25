@@ -263,29 +263,6 @@ var board = new Vue({
         },
 
         /**
-         * Get public events
-         */
-        getPublicEvents(specificMeetingDay, currentTime) {
-            let self = this
-
-            if(this.getPublicEventsToken) {
-                this.getPublicEventsToken.cancel();
-            }
-            this.getPublicEventsToken = axios.CancelToken.source();
-
-            return axios.get(this.apiNewUrl + '/event/public/location/' + this.locationId, {
-                cancelToken: self.getPublicEventsToken.token,
-                headers: {
-                    'Content-type': 'application/json',
-                    apiToken: this.apiToken
-                },
-                params: {
-                    date: specificMeetingDay === '' ? self.$options.filters.dateObjectIsoDateString(currentTime) : specificMeetingDay
-                }
-            });
-        },
-
-        /**
          * Get spaces
          */
         getSpaces() {
@@ -336,9 +313,8 @@ var board = new Vue({
          */
         updateMeetings() {
             let self = this;
-            axios.all([this.getSchedule(this.specificMeetingDay, this.currentTime), this.getPublicEvents(this.specificMeetingDay, this.currentTime)])
-            .then(axios.spread((scheduleResponse, publicEventsResponse) => {
-                let publicEvents = publicEventsResponse.data.filter(e => e.Id.startsWith('R'));
+            axios.all([this.getSchedule(this.specificMeetingDay, this.currentTime)])
+            .then(axios.spread((scheduleResponse) => {
                 let schedule = scheduleResponse.data.Spaces.filter(space => !space.SpaceName.startsWith('[hidden]'));
                 schedule.forEach(space => {
                     let foundSpace = self.spaces.find(s => s.Id === space.SpaceId)
@@ -347,13 +323,6 @@ var board = new Vue({
                         space.PublicName = foundSpace.Descriptions.find(d => d.LanguageId === self.languageId).Name;
                     }
                     foundSpace = null
-                    space.Items.forEach(reservation => {
-                        reservation.CompanyName = ''
-                        let foundEvent = publicEvents.find(e => e.ReservationId === reservation.ItemId && reservation.Type === 'Reservation')
-                        if(typeof foundEvent !== 'undefined') {
-                            reservation.CompanyName = foundEvent.CompanyName
-                        }
-                    })
                 })
                 self.meetings = schedule
             }))
