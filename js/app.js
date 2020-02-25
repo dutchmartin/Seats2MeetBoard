@@ -64,19 +64,18 @@ var board = new Vue({
     },
 
     methods: {
-        checkForUpdates() {
-            let version = getCookie('version')
-
-            axios.get('/version', {
+        async checkForUpdates() {
+            let version = Number(getCookie('version'))
+            const response = await axios.get('/version.json', {
                 headers: {
                     'Content-type': 'application/json'
                 }})
                 .then(response => {
-                    debugger
-                    if(Number(response.data) !== Number(getCookie('version'))){
-                        setCookie('version', response.data,365,true)
+                    if(Number(response.data.version) !== version){
+                        setCookie('version', response.data.version,365,true)
                     }
                 })
+                return response
         },
 
         /**
@@ -115,6 +114,7 @@ var board = new Vue({
                 self.currentTime = new Date();
 
                 if(self.currentTime.getHours() !== self.currentHour) {
+                    self.checkForUpdates()
                     self.updateMeetings()
                     self.currentHour = self.currentTime.getHours();
                 }
@@ -149,7 +149,7 @@ var board = new Vue({
             }
 
             // Check for update
-            // this.checkForUpdates()
+            this.checkForUpdates()
 
             /**
              * Load data

@@ -52,7 +52,11 @@ function setCookie(cName, value, days = 1, reload = false) {
 
   document.cookie = cName + '=' + value + expires + domain + '; path=/' // Refresh the page
   if (reload) {
-    location.reload(true)
+    var t = setTimeout(function() {
+      location.reload(true)
+      clearTimeout(t)
+    }, 350);
+    
   }
   return true
 }
