@@ -331,11 +331,10 @@ var board = new Vue({
                     foundSpace = null
                     space.Items.forEach(reservation => {
                         reservation.CompanyName = ''
-                        let foundEvent = publicEvents.find(e => e.ReservationId === reservation.ItemId)
-                        if(foundEvent !== 'undefined') {
+                        let foundEvent = publicEvents.find(e => e.ReservationId === reservation.ItemId && reservation.Type === 'Reservation')
+                        if(typeof foundEvent !== 'undefined') {
                             reservation.CompanyName = foundEvent.CompanyName
                         }
-                        foundEvent = null
                     })
                 })
                 self.meetings = schedule
