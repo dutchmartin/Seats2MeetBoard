@@ -64,6 +64,21 @@ var board = new Vue({
     },
 
     methods: {
+        checkForUpdates() {
+            let version = getCookie('version')
+
+            axios.get('/version', {
+                headers: {
+                    'Content-type': 'application/json'
+                }})
+                .then(response => {
+                    debugger
+                    if(Number(response.data) !== Number(getCookie('version'))){
+                        setCookie('version', response.data,365,true)
+                    }
+                })
+        },
+
         /**
          * Calculate content container height
          * and determine how many items must show on page
@@ -132,6 +147,9 @@ var board = new Vue({
             if(url.searchParams.has('d')) {
                 this.specificMeetingDay = url.searchParams.get('d')
             }
+
+            // Check for update
+            this.checkForUpdates()
 
             /**
              * Load data
