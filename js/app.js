@@ -1,5 +1,6 @@
 /**
  * App startup code
+ * API TOKEN: TV SCHERM 1
  */
 var board = new Vue({
     el: '#board',
@@ -9,7 +10,7 @@ var board = new Vue({
         return {
             apiUrl: 'https://www.seats2meet.com/api',
             apiNewUrl: 'https://api.seats2meet.com/api/v1',
-            apiToken: 398140257,
+            apiToken: 99345298,
             currentTime: new Date(),
             currentHour: new Date().getHours(),
             getPublicEventsToken: null,
