@@ -72,8 +72,8 @@ var board = new Vue({
                     'Content-type': 'application/json'
                 }})
                 .then(response => {
-                    if(Number(response.data.version) !== version){
-                        setCookie('version', response.data.version,365,true)
+                    if(Number(response.data.version) !== version) {
+                        setCookie('version', response.data.version,30,true)
                     }
                 })
                 return response
@@ -300,7 +300,8 @@ var board = new Vue({
                 params: {
                     locationId: this.locationId,
                     meetingtypeId: 1,
-                    date: specificMeetingDay === '' ? this.$options.filters.dateObjectIsoDateString(currentTime) : specificMeetingDay
+                    startDate: specificMeetingDay === '' ? this.$options.filters.dateObjectIsoDateString(currentTime) : specificMeetingDay,
+                    endDate: specificMeetingDay === '' ? this.$options.filters.dateObjectIsoDateString(currentTime) : specificMeetingDay
                 },
                 headers: {
                     'Content-type': 'application/json',
