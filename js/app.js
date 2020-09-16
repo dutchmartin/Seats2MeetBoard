@@ -173,7 +173,7 @@ var board = new Vue({
 
               // Process spaces
               if(spacesResponse.status === 200) {
-                self.spaces = spacesResponse.data.Results.filter(space => !space.Name.startsWith('[hidden]'));
+                self.spaces = spacesResponse.data.Results.filter(space => !space.Name.toLowerCase().startsWith('[hidden]') && !space.Name.toLowerCase().startsWith('(hidden)'));
               }
 
                 self.updateMeetings()
@@ -317,11 +317,11 @@ var board = new Vue({
             let self = this;
             axios.all([this.getSchedule(this.specificMeetingDay, this.currentTime)])
             .then(axios.spread((scheduleResponse) => {
-                let schedule = scheduleResponse.data.Spaces.filter(space => !space.SpaceName.startsWith('[hidden]'));
+                let schedule = scheduleResponse.data.Spaces.filter(space => !space.SpaceName.toLowerCase().startsWith('[hidden]') && !space.SpaceName.toLowerCase().startsWith('(hidden)'));
                 schedule.forEach(space => {
                     let foundSpace = self.spaces.find(s => s.Id === space.SpaceId)
                     space.PublicName = ''
-                    if(foundSpace !== 'undefined') {
+                    if(typeof (foundSpace) !== 'undefined') {
                         space.PublicName = foundSpace.Descriptions.find(d => d.LanguageId === self.languageId).Name;
                     }
                     foundSpace = null
